@@ -1,0 +1,21 @@
+{
+  "date": "2025-07-01",
+  "tasks": [
+    {
+      "name": "aufstehen",
+      "done": true
+    },
+    {
+      "name": "essen",
+      "done": true
+    },
+    {
+      "name": "kein exeremtal rerun nutzen",
+      "done": true
+    },
+    {
+      "name": "trainieren",
+      "done": false
+    }
+  ]
+}
