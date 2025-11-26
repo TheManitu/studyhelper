@@ -1,0 +1,19 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    ports:
+      - "11434:11434"  # optional: Hostzugriff
+    volumes:
+      - ollama_data:/root/.ollama
+
+  nicegui:
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      LLM_MODEL: llama3:8b
+    depends_on:
+      - ollama
+
+volumes:
+  ollama_data:
+

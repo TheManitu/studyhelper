@@ -1,0 +1,74 @@
+:root {
+  color-scheme: light dark;
+  --bg: #0b0c10;
+  --fg: #e6e6e6;
+  --muted: #9aa0a6;
+  --accent: #4f46e5;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #ddd3;
+}
+main { padding: 20px 80px; }
+button {
+  padding: 8px 12px;
+  border: 1px solid #ddd5;
+  border-radius: 6px;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+}
+pre {
+  background: #0002;
+  padding: 12px;
+  border-radius: 6px;
+  overflow: auto;
+}
+
+/* Layout */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2er Grid */
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+}
+.card {
+  border: 1px solid #ddd4;
+  border-radius: 10px;
+  padding: 14px;
+  background: #fff2;
+}
+.card h2 { margin: 0 0 8px 0; }
+form { display: flex; gap: 8px; margin-bottom: 10px; }
+input[type="text"], input[type="date"], input[type="number"] {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc8;
+  border-radius: 6px;
+  background: #fff;
+  color: #000; /* Schwarze Schrift in Eingabefeldern */
+}
+input::placeholder { color: #666; }
+ul { list-style: none; margin: 0; padding: 0; }
+li.item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #ddd4; }
+.row { display: flex; gap: 10px; align-items: center; margin: 8px 0; }
+
+/* Pomodoro */
+#pomo-display {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin: 8px 0;
+}
+.done { text-decoration: line-through; opacity: 0.7; }

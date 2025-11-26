@@ -1,0 +1,3 @@
+nicegui
+ollama
+python-dotenv

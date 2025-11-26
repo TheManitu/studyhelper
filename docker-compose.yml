@@ -1,0 +1,101 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.5
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: "8080"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_PROXY: edge
+    ports:
+      - "8080:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    restart: unless-stopped
+
+  web:
+    image: nginx:alpine
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+    depends_on:
+      - keycloak
+    restart: unless-stopped
+
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
+    ports:
+      - "8081:8081"
+    environment:
+      OAUTH2_PROXY_PROVIDER: oidc
+      # Issuer inklusive Port, Realm = studyhelper
+      OAUTH2_PROXY_OIDC_ISSUER_URL: http://localhost:8080/realms/studyhelper
+      # Discovery aus: wir geben Endpunkte getrennt an (öffentlich vs. intern)
+      OAUTH2_PROXY_SKIP_OIDC_DISCOVERY: "true"
+      # Browser-Login-URL öffentlich (Host)
+      OAUTH2_PROXY_LOGIN_URL: http://localhost:8080/realms/studyhelper/protocol/openid-connect/auth
+      # Server-seitige Endpunkte intern (Container-zu-Container)
+      OAUTH2_PROXY_REDEEM_URL: http://keycloak:8080/realms/studyhelper/protocol/openid-connect/token
+      OAUTH2_PROXY_OIDC_JWKS_URL: http://keycloak:8080/realms/studyhelper/protocol/openid-connect/certs
+      OAUTH2_PROXY_USERINFO_URL: http://keycloak:8080/realms/studyhelper/protocol/openid-connect/userinfo
+      # IdP-Logout, damit Keycloak-Session beendet wird (optional, Discovery ist aus)
+      # Browser muss diesen Endpoint erreichen können -> localhost
+      OAUTH2_PROXY_OIDC_END_SESSION_ENDPOINT: http://localhost:8080/realms/studyhelper/protocol/openid-connect/logout
+      # Einige Versionen erwarten diese Variable
+      OAUTH2_PROXY_OIDC_LOGOUT_URL: http://localhost:8080/realms/studyhelper/protocol/openid-connect/logout
+      # Erlaube absolute Redirects auf unsere UI-Domain
+      # Korrekte Env-Var für Redirect-Whitelist (für absolute rd= URLs)
+      # hier: UI-Domain + Keycloak-Domain erlauben
+      OAUTH2_PROXY_WHITELIST_DOMAINS: localhost:8081,.localhost:8081,localhost,localhost:8080
+      # PKCE für Keycloak erzwingen (wird im Client ebenfalls verlangt)
+      OAUTH2_PROXY_CODE_CHALLENGE_METHOD: S256
+      OAUTH2_PROXY_CLIENT_ID: oauth2-proxy
+      OAUTH2_PROXY_CLIENT_SECRET: oauth2-proxy-secret
+      OAUTH2_PROXY_REDIRECT_URL: http://localhost:8081/oauth2/callback
+      OAUTH2_PROXY_UPSTREAMS: http://nicegui:8081
+      OAUTH2_PROXY_EMAIL_DOMAINS: "*"
+      OAUTH2_PROXY_COOKIE_SECRET: a2V5Y2xvYWstbG9jYWwtc2VjcmV0LXNlZWQtbG9jYWw=
+      # Explizite Cookie-Settings, um CSRF/PKCE-Cookies zuverlässig zu setzen
+      OAUTH2_PROXY_COOKIE_SAMESITE: lax
+      OAUTH2_PROXY_COOKIE_SECURE: "false"
+      OAUTH2_PROXY_HTTP_ADDRESS: 0.0.0.0:8081
+      OAUTH2_PROXY_SCOPE: "openid email profile"
+      OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: "true"
+      # Erlaube Login ohne E-Mail-Claim: nutze preferred_username als User-ID
+      OAUTH2_PROXY_USER_ID_CLAIM: preferred_username
+      OAUTH2_PROXY_PREFER_EMAIL_TO_USER: "false"
+      OAUTH2_PROXY_INSECURE_ALLOW_UNVERIFIED_EMAIL: "true"
+      # Nützliche Header an Upstream weiterreichen (Debug/Token-Weitergabe)
+      OAUTH2_PROXY_SET_XAUTHREQUEST: "true"
+      OAUTH2_PROXY_PASS_AUTHORIZATION_HEADER: "true"
+      # Allow logout landing page without auth so it can trigger IdP logout
+      OAUTH2_PROXY_SKIP_AUTH_ROUTES: '^/logged-out\.html$|^/favicon\.ico$'
+    depends_on:
+      - keycloak
+      - web
+      - nicegui
+    restart: unless-stopped
+
+  nicegui:
+    build:
+      context: .
+      dockerfile: Dockerfile.nicegui
+    environment:
+      KEYCLOAK_ISSUER: http://localhost:8080/realms/studyhelper
+      KEYCLOAK_CLIENT_ID: nicegui-app
+      KEYCLOAK_CLIENT_SECRET: lsWWe875BFTC1h4mzal2OJZOU9uEJtN1
+      APP_BASE_URL: http://localhost:8081
+      SESSION_SECRET: change-me
+    # run behind oauth2-proxy; no direct host port mapping
+    depends_on:
+      - keycloak
+    restart: unless-stopped
+
+networks:
+  default:
+    name: studyhelper-net
+volumes:
+  keycloak_data:

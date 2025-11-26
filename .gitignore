@@ -1,5 +1,30 @@
-.venv/
+# Python cache and build artifacts
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+e2e/node_modules/
+node_modules/
+
+# Local environment overrides
+.env
+.env.*
+!.env.example
+
+# Editor / tooling folders
+.vscode/
+.idea/
+*.code-workspace
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Project-specific generated files
 tasks.json
 study_plan.json

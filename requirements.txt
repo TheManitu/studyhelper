@@ -1,2 +1,6 @@
 streamlit
 pandas
+nicegui
+python-keycloak
+requests
+python-jose[cryptography]

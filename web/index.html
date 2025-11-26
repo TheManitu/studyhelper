@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StudyHelper – Login Demo</title>
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <link rel="stylesheet" href="/styles.css" />
+    <!-- Hinter oauth2-proxy: kein keycloak.js notwendig -->
+    <script defer src="/ui.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1>StudyHelper</h1>
+      <div id="user">
+        <a id="logout" href="/oauth2/sign_out?rd=/logged-out.html">Logout</a>
+        <a id="admin-link" href="http://localhost:8080/admin/" target="_blank" rel="noopener" hidden>Keycloak Admin</a>
+      </div>
+    </header>
+    <main>
+      <section id="dashboard" class="grid">
+        <div class="card">
+          <h2>To‑Do Liste</h2>
+          <form id="todo-form">
+            <input id="todo-input" type="text" placeholder="Neue Aufgabe" autocomplete="off" />
+            <button type="submit">Hinzufügen</button>
+          </form>
+          <ul id="todo-list"></ul>
+        </div>
+
+        <div class="card">
+          <h2>Wichtige Termine</h2>
+          <form id="date-form">
+            <input id="date-text" type="text" placeholder="Beschreibung" />
+            <input id="date-when" type="date" />
+            <button type="submit">Speichern</button>
+          </form>
+          <ul id="date-list"></ul>
+        </div>
+
+        <div class="card">
+          <h2>Achievements</h2>
+          <ul id="achievements">
+            <li>Erledigte Aufgaben: <strong id="stat-done">0</strong></li>
+            <li>Pomodoros abgeschlossen: <strong id="stat-pomos">0</strong></li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>Pomodoro Timer</h2>
+          <div id="pomo-timer">
+            <div id="pomo-display">25:00</div>
+            <div class="row">
+              <button id="pomo-start" type="button">Start</button>
+              <button id="pomo-pause" type="button">Pause</button>
+              <button id="pomo-reset" type="button">Reset</button>
+            </div>
+            <div class="row">
+              Arbeit: <input id="pomo-work" type="number" min="1" value="25" /> min
+              Pause: <input id="pomo-break" type="number" min="1" value="5" /> min
+            </div>
+            <small id="pomo-phase">Phase: Arbeit</small>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+  </html>
